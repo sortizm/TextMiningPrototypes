@@ -213,18 +213,13 @@ def main():
     load_credentials(credentials_file)
 
     logger.info('Reading configuration file {0}'.format(logfile))
-    with open(arguments['CONFIGFILE'], 'r') as configfile:
-        for line in configfile.readlines():
-            logger.debug('Read line: {0}'.format(line))
-            assignment = line.split('=')
-            if len(assignment) == 2:
-                topicname = assignment[0].strip()
-                storage = JSONStorage(topicname)
-                queries = tuple(ht.strip() for ht in assignment[1].split(','))
-                logger.debug('Creating TopicMiner object for {0}: queries={1}'\
-                        ''.format(topicname, queries))
-                topicminer = TopicMiner(queries)
-                storage.store(topicminer.get_tweets())
+    for topicname, queries in load_topics(arguments['CONFIGFILE']):
+        logger.debug('Creating TopicMiner object for {0}: queries={1}'\
+                ''.format(topicname, queries))
+        topicminer = TopicMiner(queries)
+        storage = JSONStorage(topicname)
+        storage.store(topicminer.get_tweets())
+
 
 def load_credentials(credentials_filename):
     """
@@ -248,6 +243,20 @@ def load_credentials(credentials_filename):
                 CREDENTIALS['oauth_token'] = val
             elif key.lower() == 'oauth_token_secret':
                 CREDENTIALS['oauth_token_secret'] = val
+
+def load_topics(configuration_filename):
+    """Load the topics and their queries from the configuration file"""
+    topic_queries = list()
+    with open(configuration_filename, 'r') as configfile:
+        for line in configfile.readlines():
+            if line.strip()[0] == '#':
+                continue  # ignore lines beginning in '#'
+            assignment = line.split('=')
+            if len(assignment) == 2:
+                topicname = assignment[0].strip()
+                queries = tuple(q.strip() for q in assignment[1].split(','))
+                topic_queries.append((topicname, queries))
+    return tuple(topic_queries)
 
 if __name__ == '__main__':
     main()
