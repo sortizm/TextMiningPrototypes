@@ -1,1 +1,1 @@
-Politics = from:pablo_iglesias_, from:psoe, from:ppopular, #UGT, #CCOO, #AnaMatoDimision, @marianorajoy, @pablo_iglesias_, @esperanzaguirre, @_rubalcaba_, @psoe, @ppopular, @elpais_politica, @iunida
+Politics = from:pablo_iglesias_, from:psoe, from:ppopular, from:marianorajoy, from:elpais_politica, #UGT, #CCOO, #AnaMatoDimision, @marianorajoy, @pablo_iglesias_, @esperanzaguirre, @_rubalcaba_, @psoe, @ppopular, @elpais_politica, @iunida

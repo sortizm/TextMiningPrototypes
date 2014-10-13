@@ -16,6 +16,8 @@ import docopt
 import logging
 import sys
 
+from os.path import isfile
+
 try:
     import simplejson as json
 except ImportError:
@@ -76,28 +78,35 @@ class JSONStorage(object):
 
         filename: the name of the file that will be used as a storage unit
         """
-        self.filename = filename
+        self.filename = filename + '.json'
 
     def store(self, tweets):
         """
         Store the tweets in JSON format in the file specified at creation
 
-        filename: the name of the file that will be used as a storage unit
+        tweets: the tweets that will be stored
         """
+        prev_tweets = dict()
+        if isfile(self.filename):
+            with open(self.filename, 'r') as storefile:
+                self.logger.info('Loading tweets from previous session...')
+                prev_tweets = json.load(storefile)
         self.logger.info('Opening {0} to write {1} tweets'.format(
             self.filename, len(tweets)))
-        with open(self.filename+'.txt', 'w') as storefile:
-            json.dump(self._tweets_to_json(tweets), storefile, indent=3)
+        with open(self.filename, 'w') as storefile:
+            json.dump(self._tweets_to_dict(tweets, prev_tweets), storefile, indent=3)
 
-    def _tweets_to_json(self, tweets):
+    def _tweets_to_dict(self, tweets, prev_tweets_dict):
         """
-        Convert a set-like object of Tweet objects to a JSON representation
+        Convert a set-like object of Tweet objects to a dictionary representation
         """
-        tweetdict = dict()
+        merged_tweets_dict = prev_tweets_dict.copy()
+        tweets_dict = dict()
         for twt in tweets:
             twtdict = {'text': twt.text}
-            tweetdict[twt.identifier] = twtdict
-        return tweetdict
+            tweets_dict[twt.identifier] = twtdict
+        merged_tweets_dict.update(tweets_dict)
+        return merged_tweets_dict
 
 
 class Tweet(object):
@@ -115,7 +124,7 @@ class Tweet(object):
 
         status: a Twitter API status
         """
-        self.identifier = status['id']
+        self.identifier = str(status['id'])
         self.text = status['text']
 
 
@@ -250,7 +259,7 @@ def load_topics(configuration_filename):
     with open(configuration_filename, 'r') as configfile:
         for line in configfile.readlines():
             if line.strip()[0] == '#':
-                continue  # ignore lines beginning in '#'
+                continue  # ignore lines starting with '#'
             assignment = line.split('=')
             if len(assignment) == 2:
                 topicname = assignment[0].strip()
