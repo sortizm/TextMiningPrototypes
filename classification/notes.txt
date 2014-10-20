@@ -1,0 +1,20 @@
+# 4 secs 1 file
+# 1 minute 61 files (one category)
+                words_in_file = sorted(corpus.words(fid))
+                sample = [0] * len(all_words)
+                last_word = None
+                last_index = None
+                for word in sorted(words_in_file):
+                    if word not in all_words:
+                        continue
+                    if word != last_word:
+                        last_word = word
+                        last_index = all_words.index(last_word)
+                    sample[last_index] += 1
+                samples.append(tuple(sample))
+
+# 0.155 secs 1 file
+# 3.5 sec 61 files (one brown category)
+# 48 secs 500 files (entire brown corpus)
+                count = Counter(corpus.words(fid))
+                samples.append(tuple(count[word] for word in all_words))
