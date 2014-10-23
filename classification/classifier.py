@@ -21,7 +21,7 @@ profiler.enable()
 datavars = dict()
 corpus = brown
 CATEGORIES = corpus.categories()
-FILENAME = 'classifier.json'
+FILENAME = 'cached_data.json'
 CPU_COUNT = os.cpu_count() if os.cpu_count() is not None else 1
 FID_CATEGORY = dict()
 for category in corpus.categories():

@@ -53,5 +53,5 @@ docs/_build/
 # PyBuilder
 target/
 
-# Proyect binary data files
-*.dat
+# Proyect json data files
+*.json
