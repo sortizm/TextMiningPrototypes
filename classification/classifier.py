@@ -7,8 +7,7 @@ import io
 import os
 from nltk.corpus import brown, stopwords
 from collections import Counter
-from itertools import chain
-from multiprocessing import Pool
+from multiprocessing import Pool # pylint: disable=no-name-in-module
 from itertools import zip_longest
 import json
 
@@ -66,12 +65,6 @@ def get_samples_category():
         cpu_jobs = split_list(corpus.fileids(), CPU_COUNT)
         cpu_pool = Pool(CPU_COUNT)
         scd = cpu_pool.map(get_samples_from_fileids, cpu_jobs)
-        #samples_category = dict(zip_longest(corpus.categories(), [], fillvalue=list()))
-        #for sample in sample_list:
-            #samples_category[fid_category[sample[0]]].append(tuple(sample[1]))
-            #samples_category[category] +=
-            #{fid_category[sample[0]]: sample[1]
-                #for sample in chain.from_iterable(sample_list)}
         samples_category = {cat:[d.get(cat) for d in scd] for cat in {cat for d in scd for cat in d}}
         datavars['samples_category'] = samples_category
         with open(FILENAME, 'w') as datafile:
