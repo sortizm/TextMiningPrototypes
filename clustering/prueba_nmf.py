@@ -63,7 +63,7 @@ def preprocess():
         with open(FILENAME, 'r') as datafile:
             datavars.update(json.load(datafile))
     if 'filtered_words' not in datavars or 'wordsTexts' not in datavars: # even after loading file
-        print('hola')
+        print('No json found')
         wordsTexts=[] #list of counts
         filteredWords=[]
         tuplaAux=()
@@ -92,13 +92,12 @@ def preprocess():
 
 def stemming(palabras,wordsTexts):
     stemmer1 = SnowballStemmer("spanish")
-    stemmer2 = SnowballStemmer("english")
     stemWordText=[[] for i in range(len(wordsTexts))]
     for i in palabras:
         try:
             stemPalabras.append(stemmer1.stem(i))
         except IndexError:
-            stemPalabras.append(stemmer2.stem(i))
+            pass 
     i=-1
     for text in wordsTexts:
         i=i+1
@@ -106,7 +105,7 @@ def stemming(palabras,wordsTexts):
             try:
                 stemWordText[i].append(stemmer1.stem(word))
             except IndexError:
-                stemWordText[i].append(stemmer2.stem(word))
+                pass
             
     palabras=list(set(stemPalabras))
     wordsTexts=stemWordText
