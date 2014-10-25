@@ -81,7 +81,7 @@ def preprocess():
         #filteredWords=list( set(a for a,b in dicNum.items() if b>=textosMin and b<=textosMax)-set(stopwords.words('english')) )
         #f= set(a for a,b in dicNum.items() if b>=textosMin and b<=textosMax)
         #filteredWords=list(f)
-        filteredWords=list(a for a in count if count[a]>=textosMin and count[a]<=textosMax)
+        filteredWords=list(a for a in count if count[a]>=textosMin and count[a]<=textosMax and a not in stopwords.words('spanish'))
         datavars['filtered_words'] = filteredWords
         datavars['wordsTexts'] = wordsTexts
         with open(FILENAME, 'w') as datafile:
@@ -93,6 +93,7 @@ def preprocess():
 def stemming(palabras,wordsTexts):
     stemmer1 = SnowballStemmer("spanish")
     stemWordText=[[] for i in range(len(wordsTexts))]
+    stemPalabras=[]
     for i in palabras:
         try:
             stemPalabras.append(stemmer1.stem(i))
