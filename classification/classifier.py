@@ -2,13 +2,17 @@ import nltk
 #import numpy
 #import matplotlib
 from sklearn.svm import SVC
+from sklearn.feature_extraction.text import TfidfVectorizer
 import pstats
 import io
 import os
+import re
 import random
 from nltk.corpus import brown, stopwords
 from collections import Counter
 import json
+
+from nltk.stem import snowball
 
 import cProfile as profile
 
@@ -19,6 +23,7 @@ profiler.enable()
 ################################################################################
 datavars = dict()
 corpus = brown
+FID_DIRECTORY = '/home/steven/nltk_data/corpora/brown'
 CATEGORIES = corpus.categories()
 FILENAME = 'cached_data.json'
 
@@ -27,8 +32,9 @@ def get_all_words():
         with open(FILENAME, 'r') as datafile:
             datavars.update(json.load(datafile))
     if 'all_words' not in datavars: # even after loading file
+        stemmer = snowball.EnglishStemmer(ignore_stopwords=True)
         all_words = sorted(list(
-            set(w.lower() for w in corpus.words() if w.isalnum() and len(w) > 3) -
+            set(stemmer.stem(w) for w in corpus.words() if w.isalnum() and len(w) > 3) -
             set(stopwords.words())
             ))
         datavars['all_words'] = all_words
@@ -36,61 +42,57 @@ def get_all_words():
             json.dump(datavars, datafile, indent=4)
     return datavars['all_words']
 
+def shuffle_list(lst, seed=None):
+    random.seed(a=seed)
+    random.shuffle(lst)
 
-def get_samples_category():
-    if 'samples_category' not in datavars and os.path.exists(FILENAME):
-        with open(FILENAME, 'r') as datafile:
-            datavars.update(json.load(datafile))
-    if 'samples_category' not in datavars: # even after loading file
-        samples_category = dict()
-        for category in corpus.categories():
-            samples = list()
-            for fid in corpus.fileids(categories=category):
-                count = Counter(corpus.words(fid))
-                samples.append(tuple(count[word] for word in datavars['all_words']))
-            samples_category[category] = tuple(samples)
-        datavars['samples_category'] = samples_category
-        with open(FILENAME, 'w') as datafile:
-            json.dump(datavars, datafile, indent=4)
-    return datavars['samples_category']
+def split_list(lst, percent=0.5, part=None):
+    end_index_first = int(len(lst) * percent)
+    part1, part2 = lst[:end_index_first], lst[end_index_first+1:]
+    if part == 1:
+        return part1
+    elif part == 2:
+        return part2
+    return part1, part2
 
-def get_SVM_samples_predictions(samples_categories):
-    if 'svm_samples_predictions' not in datavars and os.path.exists(FILENAME):
-        with open(FILENAME, 'r') as datafile:
-            datavars.update(json.load(datafile))
-    if 'svm_samples_predictions' not in datavars: # even after loading file
-        svm_samples = list()
-        svm_predictions = list()
-        for category, samples in samples_categories.items():
-            cat = CATEGORIES.index(category)
-            for samp in samples:
-                svm_samples.append(samp)
-                svm_predictions.append(cat)
-        indexes = list(range(len(svm_samples)))
-        random.shuffle(indexes)
-        svm_samples_shuf = list()
-        svm_predictions_shuf = list()
-        len80pc = int(len(indexes) * 0.8)
-        for i in indexes:
-            svm_samples_shuf.append(svm_samples[i])
-            svm_predictions_shuf.append(svm_predictions[i])
-        # 80% of samples will be used for training, and the remaining 20% for testing
-        svm_samples_predictions = (tuple(svm_samples_shuf[:len80pc]), tuple(svm_predictions_shuf[:len80pc]),
-                tuple(svm_samples_shuf[len80pc+1:]), tuple(svm_predictions_shuf[len80pc+1:]))
-        datavars['svm_samples_predictions'] = svm_samples_predictions
-        with open(FILENAME, 'w') as datafile:
-            json.dump(datavars, datafile, indent=4)
-    return datavars['svm_samples_predictions']
+def get_samples_predictions(all_words, percent):
+
+    def tokenizer(string):
+        stemmer = snowball.EnglishStemmer(ignore_stopwords=True)
+        regex = re.compile('\w\w+')
+        return tuple(stemmer.stem(w) for w in regex.findall(string))
+
+    vectorizer = TfidfVectorizer(
+            input='filename',
+            tokenizer=tokenizer,
+            ngram_range=(1, 3),
+            stop_words=stopwords.words(),
+            max_df=0.95, # ignore words with a term frequency higher than 95% (corpus specific stopwords)
+            vocabulary=all_words,
+            use_idf=True, # use inverse-document-frequency reweighting
+            sublinear_tf=True # tf is 1-log(tf)
+            )
+    sample_fids, predictions = list(), list()
+    for category in CATEGORIES:
+        for fid in corpus.fileids(categories=category):
+            sample_fids.append(os.path.join(FID_DIRECTORY, fid))
+            predictions.append(CATEGORIES.index(category))
+    shuffle_list(sample_fids, seed=123)
+    shuffle_list(predictions, seed=123)
+    training_fids, test_fids = split_list(sample_fids, percent=percent)
+    training_samples = vectorizer.fit_transform(training_fids)
+    test_samples = vectorizer.fit_transform(test_fids)
+    training_predictions, test_predictions = split_list(predictions, percent=percent)
+    return training_samples, training_predictions, test_samples, test_predictions
 
 ALL_WORDS = get_all_words()
-SAMPLES_CATEGORY = get_samples_category()
+TRAINING_SAMPLES, TRAINING_PREDICTIONS, TEST_SAMPLES, TEST_PREDICTIONS = get_samples_predictions(ALL_WORDS, 0.8)
 
-TRAIN_SAMP, TRAIN_PRED, TEST_SAMP, TEST_PRED = get_SVM_samples_predictions(SAMPLES_CATEGORY)
 print('Training...')
 CLASSIFIER = SVC(kernel='rbf')
-CLASSIFIER.fit(TRAIN_SAMP, TRAIN_PRED)
+CLASSIFIER.fit(TRAINING_SAMPLES, TRAINING_PREDICTIONS)
 print('Calculating mean accuracy')
-print(CLASSIFIER.score(TEST_SAMP, TEST_PRED))
+print(CLASSIFIER.score(TEST_SAMPLES, TEST_PREDICTIONS))
 
 ################################################################################
 
