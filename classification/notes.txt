@@ -18,3 +18,28 @@
 # 48 secs 500 files (entire brown corpus)
                 count = Counter(corpus.words(fid))
                 samples.append(tuple(count[word] for word in all_words))
+
+********************************************************************************
+********************************************************************************
+
+get_all_words: 39574 words
+get_all_words_stemmed: 24334 words
+
+diff: 15240 words
+
+# 28 seconds to run on brown corpus
+def get_all_words_stemmed():
+    stemmer = snowball.EnglishStemmer(ignore_stopwords=True)
+    all_words = sorted(list(
+            set(stemmer.stem(w.lower()) for w in corpus.words() if w.isalnum() and len(w) > 3) -
+            set(stopwords.words())
+            ))
+    return all_words
+
+# 8 seconds to run on brown corpus
+def get_all_words():
+    all_words = sorted(list(
+            set(w.lower() for w in corpus.words() if w.isalnum() and len(w) > 3) -
+            set(stopwords.words())
+            ))
+    return all_words
