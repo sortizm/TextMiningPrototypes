@@ -8,7 +8,6 @@ import os
 import random
 from nltk.corpus import brown, stopwords
 from collections import Counter
-from itertools import zip_longest
 import json
 
 import cProfile as profile
@@ -22,7 +21,6 @@ datavars = dict()
 corpus = brown
 CATEGORIES = corpus.categories()
 FILENAME = 'cached_data.json'
-CPU_COUNT = os.cpu_count() if os.cpu_count() is not None else 1
 
 def get_all_words():
     if 'all_words' not in datavars and os.path.exists(FILENAME):
