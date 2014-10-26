@@ -1,0 +1,8 @@
+Time spent with the brown corpus
+
+	-Existing jSon file
+		*Wirh stemmer: 54.8 s
+		*With no stemmer 13.412 s
+	-Not existing jSon file
+		*Wirh stemmer: 68.43 s
+		*With no stemmer 25.711 s
