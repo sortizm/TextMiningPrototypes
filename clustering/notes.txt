@@ -1,8 +1,31 @@
-Time spent with the brown corpus
+##############
+Trace before changes:
+##############
+Preprocessing
+No json found in the preprocess
+done in 12.686s.
+Stemming
+No json found in the stemming
+done in 59.695s.
+Creating data matrix
+done in 67.006s.
+Non-negative factorization
+done in 72.748s.
+Printing results
+done in 72.759s.
 
-	-Existing jSon file
-		*Wirh stemmer: 54.8 s
-		*With no stemmer 13.412 s
-	-Not existing jSon file
-		*Wirh stemmer: 68.43 s
-		*With no stemmer 25.711 s
+#####################
+Trace after changes:
+#####################
+Preprocessing
+No json found in the preprocess
+done in 11.610s.
+Stemming
+No json found in the stemming
+done in 16.079s.
+Creating data matrix
+done in 22.454s.
+Non-negative factorization
+done in 25.111s.
+Printing results
+done in 25.126s.
