@@ -29,3 +29,65 @@ Non-negative factorization
 done in 25.111s.
 Printing results
 done in 25.126s.
+
+##################################
+Accuracy or purity of the cluster
+##################################
+In the brown corpus compared with the 15 categories it has 
+(5,80) in preprocessing args
+A value of 1.0 is a perfect cluster
+
+N_CLUSTERS:5 ---> 0.262
+N_CLUSTERS:10 ---> 0.304
+N_CLUSTERS:14 ---> 0.374
+N_CLUSTERS:15 ---> 0.402
+N_CLUSTERS:16 ---> 0.358
+N_CLUSTERS:20 ---> 0.356
+N_CLUSTERS:25 ---> 0.324
+
+We can see that the best result in the accuracy evaluation 
+is in the optimal number of clusters
+
+Preprocessing percentages with 15 clusters:
+
+(2,95)  --->  0.356
+(2,85)  --->  0.356
+(5,85)  --->  0.402
+(4,90)  --->  0.398
+(5,80)  --->  0.402
+(4,80)  --->  0.4
+(5,85)  --->  0.36
+(6,80)  --->  0.324
+(7,85)  --->  0.37
+(10,85) --->  0.36
+
+REUTERS: with (0.5,85) Reuters has 90 categories
+15 clusters: 0.49
+90 clusters: 0.24
+30 clusters: 0.44
+16 clusters: 0.49
+14 clusters: 0.496
+8 clusters: 0.58
+2 clusters: 0.42
+
+#######################
+Analysis of the TF*IDF
+#######################
+REUTERS with (0.2,80) with TF*IDF (used in the code)
+2 clusters: 0.416
+15 clusters: 0.467
+
+REUTERS with (0.2,80) and without IDF
+15 clusters: 0.32
+
+REUTERS with (0.2,80) with IDF and relative TF
+15 clusters  0.26
+
+REUTERS with (0.2,80) with TF*IDF (TF with log of relative frequency)
+15 clusters: 0.31
+
+REUTERS with (0.2,80) with TF*IDF (TF without log)
+15 clusters: 0.495
+
+BROWN with (5,80) with TF*IDF (TF without log)
+15 clusters: 0.28
